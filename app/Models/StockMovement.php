@@ -20,8 +20,10 @@ class StockMovement extends Model
 
     public const TYPE_ADJUSTMENT = 'Adjustment';
 
+    public const TYPE_TRANSFER = 'Transfer';
+
     protected $fillable = [
-        'pharmacy_id', 'medicine_id', 'batch_id', 'type', 'qty', 'reference', 'reference_id',
+        'pharmacy_id', 'location_id', 'medicine_id', 'batch_id', 'type', 'qty', 'reference', 'reference_id',
     ];
 
     public function medicine(): BelongsTo
@@ -32,5 +34,10 @@ class StockMovement extends Model
     public function batch(): BelongsTo
     {
         return $this->belongsTo(MedicineBatch::class, 'batch_id');
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
     }
 }

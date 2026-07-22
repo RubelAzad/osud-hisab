@@ -17,6 +17,7 @@ class SaleService
     /**
      * @param  array{
      *     customer_id?: int|null,
+     *     location_id: int,
      *     sale_date: string,
      *     discount?: float,
      *     paid?: float,
@@ -30,6 +31,7 @@ class SaleService
         return DB::transaction(function () use ($data, $createdBy) {
             $sale = Sale::create([
                 'customer_id' => $data['customer_id'] ?? null,
+                'location_id' => $data['location_id'],
                 'sale_date' => $data['sale_date'],
                 'payment_method' => $data['payment_method'] ?? 'cash',
                 'note' => $data['note'] ?? null,
@@ -46,6 +48,7 @@ class SaleService
                 $qtyRemaining = (int) $item['qty'];
 
                 $batches = MedicineBatch::where('medicine_id', $medicine->id)
+                    ->where('location_id', $data['location_id'])
                     ->where('remaining_qty', '>', 0)
                     ->orderBy('created_at')
                     ->orderBy('id')
@@ -84,6 +87,7 @@ class SaleService
                         batchId: $batch->id,
                         type: StockMovement::TYPE_SALE,
                         qty: -$qtyFromBatch,
+                        locationId: $data['location_id'],
                         reference: 'sale',
                         referenceId: $sale->id,
                     );

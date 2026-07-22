@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'phone', 'password', 'status', 'pharmacy_id', 'is_super_admin'])]
+#[Fillable(['name', 'email', 'phone', 'password', 'status', 'pharmacy_id', 'location_id', 'is_super_admin'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -37,6 +37,11 @@ class User extends Authenticatable
     public function pharmacy(): BelongsTo
     {
         return $this->belongsTo(Pharmacy::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
     }
 
     public function purchases()

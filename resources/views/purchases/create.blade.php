@@ -29,11 +29,21 @@
                         @endforeach
                     </select>
                 </div>
+                @if ($locations->count() > 1)
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Location</label>
+                        <select name="location_id" class="form-select" required>
+                            @foreach ($locations as $location)
+                                <option value="{{ $location->id }}" {{ old('location_id', currentLocationId()) == $location->id ? 'selected' : '' }}>{{ $location->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Purchase Date</label>
                     <input type="date" name="purchase_date" class="form-control" value="{{ old('purchase_date', now()->format('Y-m-d')) }}" required>
                 </div>
-                <div class="col-md-5 mb-3">
+                <div class="col-md-{{ $locations->count() > 1 ? 2 : 5 }} mb-3">
                     <label class="form-label">Note</label>
                     <input type="text" name="note" class="form-control" value="{{ old('note') }}">
                 </div>

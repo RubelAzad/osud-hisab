@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('stock_movements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pharmacy_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('location_id')->constrained()->restrictOnDelete();
             $table->foreignId('medicine_id')->constrained()->restrictOnDelete();
             $table->foreignId('batch_id')->nullable()->constrained('medicine_batches')->nullOnDelete();
             $table->string('type');

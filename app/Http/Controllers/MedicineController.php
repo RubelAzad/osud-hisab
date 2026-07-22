@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\MedicinesExport;
 use App\Http\Requests\MedicineRequest;
+use App\Imports\MedicinesImport;
 use App\Models\Category;
 use App\Models\Generic;
 use App\Models\Manufacturer;
@@ -13,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MedicineController extends Controller
 {
@@ -53,7 +56,7 @@ class MedicineController extends Controller
     public function show(Medicine $medicine): View
     {
         $medicine->load(['category', 'manufacturer', 'generic', 'medicineType', 'unit']);
-        $batches = $medicine->batches()->latest()->paginate(10);
+        $batches = $medicine->batches()->with('location')->latest()->paginate(10);
 
         return view('medicines.show', compact('medicine', 'batches'));
     }
@@ -88,6 +91,24 @@ class MedicineController extends Controller
         $medicine->delete();
 
         return redirect()->route('medicines.index')->with('success', 'Medicine deleted.');
+    }
+
+    public function export()
+    {
+        $filename = 'medicines-'.now()->format('Y-m-d').'.xlsx';
+
+        return Excel::download(new MedicinesExport, $filename);
+    }
+
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate(['file' => ['required', 'file', 'mimes:xlsx,xls,csv']]);
+
+        $import = new MedicinesImport;
+        Excel::import($import, $request->file('file'));
+
+        return redirect()->route('medicines.index')
+            ->with('success', "Imported {$import->imported} medicines ({$import->skipped} skipped — either a duplicate barcode or an unrecognized category/manufacturer/generic/unit/type name).");
     }
 
     private function formData(): array

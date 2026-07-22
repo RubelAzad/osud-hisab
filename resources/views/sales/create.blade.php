@@ -23,7 +23,7 @@
     <div class="card mb-3">
         <div class="card-body">
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-{{ $locations->count() > 1 ? 3 : 4 }} mb-3">
                     <label class="form-label">Customer</label>
                     <select name="customer_id" class="form-select">
                         <option value="">Walk-in Customer</option>
@@ -32,11 +32,21 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3 mb-3">
+                @if ($locations->count() > 1)
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Location</label>
+                        <select name="location_id" class="form-select" required>
+                            @foreach ($locations as $location)
+                                <option value="{{ $location->id }}" {{ old('location_id', currentLocationId()) == $location->id ? 'selected' : '' }}>{{ $location->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+                <div class="col-md-2 mb-3">
                     <label class="form-label">Sale Date</label>
                     <input type="date" name="sale_date" class="form-control" value="{{ old('sale_date', now()->format('Y-m-d')) }}" required>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2 mb-3">
                     <label class="form-label">Payment Method</label>
                     <select name="payment_method" class="form-select">
                         <option value="cash">Cash</option>

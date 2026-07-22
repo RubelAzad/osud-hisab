@@ -5,11 +5,16 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Sale {{ $sale->invoice_no }}</h4>
-    @can('sale_returns.create')
-        <a href="{{ route('sales.returns.create', $sale) }}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-return-left"></i> Return Items
+    <div>
+        <a href="{{ route('sales.invoice', $sale) }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-file-earmark-pdf"></i> Download PDF
         </a>
-    @endcan
+        @can('sale_returns.create')
+            <a href="{{ route('sales.returns.create', $sale) }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-return-left"></i> Return Items
+            </a>
+        @endcan
+    </div>
 </div>
 
 <div class="row mb-3">

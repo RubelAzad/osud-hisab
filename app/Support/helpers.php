@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Location;
 use App\Models\Pharmacy;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,6 +33,37 @@ if (! function_exists('currentPharmacy')) {
         }
 
         return app()->bound('currentPharmacy') ? app('currentPharmacy') : null;
+    }
+}
+
+if (! function_exists('currentLocationId')) {
+    /**
+     * A user's chosen location for this session (via the location switcher) takes priority
+     * over their home location, so an Admin with access to multiple locations can switch
+     * without that changing their permanent assignment.
+     */
+    function currentLocationId(): ?int
+    {
+        $user = Auth::user();
+
+        if (! $user || $user->is_super_admin) {
+            return null;
+        }
+
+        if (session()->has('current_location_id')) {
+            return session('current_location_id');
+        }
+
+        return $user->location_id;
+    }
+}
+
+if (! function_exists('currentLocation')) {
+    function currentLocation(): ?Location
+    {
+        $id = currentLocationId();
+
+        return $id ? Location::find($id) : null;
     }
 }
 

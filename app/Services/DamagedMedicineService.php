@@ -26,6 +26,7 @@ class DamagedMedicineService
 
             $damaged = DamagedMedicine::create([
                 'medicine_batch_id' => $batch->id,
+                'location_id' => $batch->location_id,
                 'qty' => $qty,
                 'reason' => $data['reason'] ?? null,
                 'created_by' => $createdBy,
@@ -38,6 +39,7 @@ class DamagedMedicineService
                 batchId: $batch->id,
                 type: StockMovement::TYPE_DAMAGE,
                 qty: -$qty,
+                locationId: $batch->location_id,
                 reference: 'damaged_medicine',
                 referenceId: $damaged->id,
             );

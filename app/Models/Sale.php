@@ -12,7 +12,7 @@ class Sale extends Model
     use BelongsToPharmacy;
 
     protected $fillable = [
-        'pharmacy_id', 'invoice_no', 'customer_id', 'sale_date', 'subtotal', 'discount',
+        'pharmacy_id', 'location_id', 'invoice_no', 'customer_id', 'sale_date', 'subtotal', 'discount',
         'vat', 'total', 'paid', 'due', 'payment_method', 'created_by', 'note',
     ];
 
@@ -39,6 +39,11 @@ class Sale extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
     }
 
     public function items(): HasMany

@@ -16,6 +16,7 @@ class PurchaseService
     /**
      * @param  array{
      *     supplier_id: int,
+     *     location_id: int,
      *     purchase_date: string,
      *     discount?: float,
      *     vat?: float,
@@ -43,6 +44,7 @@ class PurchaseService
 
             $purchase = Purchase::create([
                 'supplier_id' => $data['supplier_id'],
+                'location_id' => $data['location_id'],
                 'purchase_date' => $data['purchase_date'],
                 'subtotal' => $subtotal,
                 'discount' => $discount,
@@ -58,6 +60,7 @@ class PurchaseService
             foreach ($data['items'] as $item) {
                 $batch = MedicineBatch::create([
                     'medicine_id' => $item['medicine_id'],
+                    'location_id' => $data['location_id'],
                     'batch_no' => $item['batch_no'],
                     'purchase_price' => $item['purchase_price'],
                     'sale_price' => $item['sale_price'],
@@ -88,6 +91,7 @@ class PurchaseService
                     batchId: $batch->id,
                     type: StockMovement::TYPE_PURCHASE,
                     qty: $item['qty'],
+                    locationId: $data['location_id'],
                     reference: 'purchase',
                     referenceId: $purchase->id,
                 );

@@ -49,6 +49,7 @@
             <thead class="table-light">
                 <tr>
                     <th>Batch No</th>
+                    <th>Location</th>
                     <th>Supplier</th>
                     <th>Qty</th>
                     <th>Remaining</th>
@@ -61,6 +62,7 @@
                 @forelse ($batches as $batch)
                     <tr class="{{ $batch->expiry_date && $batch->expiry_date->isPast() ? 'table-danger' : '' }}">
                         <td>{{ $batch->batch_no }}</td>
+                        <td>{{ $batch->location->name ?? '-' }}</td>
                         <td>{{ $batch->supplier->name ?? '-' }}</td>
                         <td>{{ $batch->quantity }}</td>
                         <td>{{ $batch->remaining_qty }}</td>
@@ -69,7 +71,7 @@
                         <td>{{ $batch->expiry_date?->format('Y-m-d') ?? '-' }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="text-center text-muted py-4">No batches yet — purchase this medicine to create one.</td></tr>
+                    <tr><td colspan="8" class="text-center text-muted py-4">No batches yet — purchase this medicine to create one.</td></tr>
                 @endforelse
             </tbody>
         </table>

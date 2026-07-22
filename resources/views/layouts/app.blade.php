@@ -85,6 +85,9 @@
                 @can('sale_returns.view')
                     <a href="{{ route('sale-returns.index') }}" class="nav-link {{ request()->routeIs('sale-returns.*') ? 'active' : '' }}"><i class="bi bi-arrow-return-left me-2"></i> Sale Returns</a>
                 @endcan
+                @can('stock_transfers.view')
+                    <a href="{{ route('stock-transfers.index') }}" class="nav-link {{ request()->routeIs('stock-transfers.*') ? 'active' : '' }}"><i class="bi bi-arrow-left-right me-2"></i> Stock Transfers</a>
+                @endcan
 
                 @canany(['suppliers.view','customers.view'])
                     <div class="nav-header">Partners</div>
@@ -124,6 +127,9 @@
                 @can('roles.view')
                     <a href="{{ route('roles.index') }}" class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}"><i class="bi bi-shield-lock me-2"></i> Roles</a>
                 @endcan
+                @can('locations.view')
+                    <a href="{{ route('locations.index') }}" class="nav-link {{ request()->routeIs('locations.*') ? 'active' : '' }}"><i class="bi bi-geo-alt me-2"></i> Locations</a>
+                @endcan
                 @can('settings.edit')
                     <a href="{{ route('settings.edit') }}" class="nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}"><i class="bi bi-gear me-2"></i> Settings</a>
                 @endcan
@@ -132,6 +138,31 @@
 
         <div class="main-content">
             <nav class="navbar navbar-expand navbar-light bg-white border-bottom px-3">
+                @can('sales.create')
+                    <a href="{{ route('pos.index') }}" class="btn btn-sm btn-primary me-3">
+                        <i class="bi bi-shop me-1"></i> Point of Sale
+                    </a>
+                @endcan
+
+                @php $allLocations = \App\Models\Location::where('status', true)->orderBy('name')->get(); @endphp
+                @if ($allLocations->count() > 1)
+                    <div class="dropdown me-3">
+                        <a href="#" class="text-dark dropdown-toggle small" data-bs-toggle="dropdown">
+                            <i class="bi bi-geo-alt me-1"></i> {{ currentLocation()?->name ?? 'Select Location' }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            @foreach ($allLocations as $loc)
+                                <li>
+                                    <form method="POST" action="{{ route('locations.switch', $loc) }}">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item {{ currentLocationId() == $loc->id ? 'fw-bold' : '' }}">{{ $loc->name }}</button>
+                                    </form>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 @can('notifications.view')
                     @php $unreadNotifications = \App\Models\Notification::where('is_read', false)->latest()->limit(5)->get(); @endphp
                     <div class="dropdown ms-auto me-3">

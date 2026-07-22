@@ -5,10 +5,41 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Medicines</h4>
-    @can('medicines.create')
-        <a href="{{ route('medicines.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Medicine</a>
-    @endcan
+    <div class="d-flex gap-2">
+        @can('medicines.view')
+            <a href="{{ route('medicines.barcode-labels') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-upc-scan"></i> Print Labels</a>
+            <a href="{{ route('medicines.export') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-file-earmark-excel"></i> Export</a>
+        @endcan
+        @can('medicines.create')
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#import-modal"><i class="bi bi-upload"></i> Import</button>
+            <a href="{{ route('medicines.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Medicine</a>
+        @endcan
+    </div>
 </div>
+
+@can('medicines.create')
+<div class="modal fade" id="import-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('medicines.import') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Import Medicines</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Upload an Excel/CSV file exported from this screen (or matching its columns). Category, Manufacturer, Generic, Unit, and Medicine Type are matched by name — unmatched rows are skipped.</p>
+                    <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcan
 
 <div class="card mb-3">
     <div class="card-body py-2">

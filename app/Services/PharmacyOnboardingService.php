@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CashAccount;
+use App\Models\Location;
 use App\Models\Pharmacy;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +34,8 @@ class PharmacyOnboardingService
             'damaged_medicines.view', 'damaged_medicines.create',
             'notifications.view',
             'reports.view',
+            'locations.view',
+            'stock_transfers.view', 'stock_transfers.create',
         ],
         'Cashier' => [
             'dashboard.view',
@@ -66,8 +69,16 @@ class PharmacyOnboardingService
                 $role->syncPermissions($permissions);
             }
 
+            $location = Location::create([
+                'pharmacy_id' => $pharmacy->id,
+                'name' => 'Main Branch',
+                'is_default' => true,
+                'status' => true,
+            ]);
+
             $owner = User::create(array_merge($ownerData, [
                 'pharmacy_id' => $pharmacy->id,
+                'location_id' => $location->id,
                 'status' => true,
                 'email_verified_at' => now(),
             ]));

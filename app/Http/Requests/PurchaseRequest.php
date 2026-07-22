@@ -16,6 +16,7 @@ class PurchaseRequest extends FormRequest
     {
         return [
             'supplier_id' => ['required', Rule::exists('suppliers', 'id')->where('pharmacy_id', currentPharmacyId())],
+            'location_id' => ['sometimes', Rule::exists('locations', 'id')->where('pharmacy_id', currentPharmacyId())],
             'purchase_date' => ['required', 'date'],
             'discount' => ['nullable', 'numeric', 'min:0'],
             'vat' => ['nullable', 'numeric', 'min:0'],

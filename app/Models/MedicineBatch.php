@@ -12,7 +12,7 @@ class MedicineBatch extends Model
     use BelongsToPharmacy;
 
     protected $fillable = [
-        'pharmacy_id', 'medicine_id', 'batch_no', 'purchase_price', 'sale_price',
+        'pharmacy_id', 'location_id', 'medicine_id', 'batch_no', 'purchase_price', 'sale_price',
         'quantity', 'remaining_qty', 'expiry_date', 'manufacture_date', 'supplier_id',
     ];
 
@@ -26,6 +26,11 @@ class MedicineBatch extends Model
     public function medicine(): BelongsTo
     {
         return $this->belongsTo(Medicine::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
     }
 
     public function supplier(): BelongsTo

@@ -12,7 +12,7 @@ class Purchase extends Model
     use BelongsToPharmacy;
 
     protected $fillable = [
-        'pharmacy_id', 'supplier_id', 'invoice_no', 'purchase_date', 'subtotal', 'discount',
+        'pharmacy_id', 'location_id', 'supplier_id', 'invoice_no', 'purchase_date', 'subtotal', 'discount',
         'vat', 'tax', 'total', 'paid', 'due', 'note', 'created_by',
     ];
 
@@ -40,6 +40,11 @@ class Purchase extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
     }
 
     public function items(): HasMany

@@ -10,7 +10,7 @@ class DamagedMedicine extends Model
 {
     use BelongsToPharmacy;
 
-    protected $fillable = ['pharmacy_id', 'medicine_batch_id', 'qty', 'reason', 'created_by'];
+    protected $fillable = ['pharmacy_id', 'location_id', 'medicine_batch_id', 'qty', 'reason', 'created_by'];
 
     public function medicineBatch(): BelongsTo
     {

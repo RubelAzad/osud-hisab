@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PurchaseRequest;
+use App\Models\Location;
 use App\Models\Medicine;
 use App\Models\Purchase;
 use App\Models\Supplier;
@@ -16,7 +17,7 @@ class PurchaseController extends Controller
 
     public function index(): View
     {
-        $purchases = Purchase::with('supplier')->latest()->paginate(15);
+        $purchases = Purchase::with(['supplier', 'location'])->latest()->paginate(15);
 
         return view('purchases.index', compact('purchases'));
     }
@@ -27,6 +28,7 @@ class PurchaseController extends Controller
 
         return view('purchases.create', [
             'suppliers' => Supplier::where('status', true)->orderBy('name')->get(),
+            'locations' => Location::where('status', true)->orderBy('name')->get(),
             'medicinesJson' => $medicines->map(fn (Medicine $m) => [
                 'id' => $m->id,
                 'name' => $m->medicine_name.' '.$m->strength,
@@ -38,14 +40,17 @@ class PurchaseController extends Controller
 
     public function store(PurchaseRequest $request): RedirectResponse
     {
-        $purchase = $this->purchaseService->create($request->validated(), auth()->id());
+        $data = $request->validated();
+        $data['location_id'] = $data['location_id'] ?? currentLocationId();
+
+        $purchase = $this->purchaseService->create($data, auth()->id());
 
         return redirect()->route('purchases.show', $purchase)->with('success', 'Purchase recorded.');
     }
 
     public function show(Purchase $purchase): View
     {
-        $purchase->load(['supplier', 'items.medicine', 'items.medicineBatch']);
+        $purchase->load(['supplier', 'location', 'items.medicine', 'items.medicineBatch']);
 
         return view('purchases.show', compact('purchase'));
     }

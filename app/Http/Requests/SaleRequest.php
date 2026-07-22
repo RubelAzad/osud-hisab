@@ -16,6 +16,7 @@ class SaleRequest extends FormRequest
     {
         return [
             'customer_id' => ['nullable', Rule::exists('customers', 'id')->where('pharmacy_id', currentPharmacyId())],
+            'location_id' => ['sometimes', Rule::exists('locations', 'id')->where('pharmacy_id', currentPharmacyId())],
             'sale_date' => ['required', 'date'],
             'discount' => ['nullable', 'numeric', 'min:0'],
             'paid' => ['nullable', 'numeric', 'min:0'],

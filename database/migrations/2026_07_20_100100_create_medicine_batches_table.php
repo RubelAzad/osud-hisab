@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('medicine_batches', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pharmacy_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('location_id')->constrained()->restrictOnDelete();
             $table->foreignId('medicine_id')->constrained()->restrictOnDelete();
             $table->string('batch_no');
             $table->decimal('purchase_price', 10, 2);
@@ -22,7 +23,7 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained()->nullOnDelete();
             $table->timestamps();
 
-            $table->index(['medicine_id', 'remaining_qty']);
+            $table->index(['medicine_id', 'location_id', 'remaining_qty']);
             $table->index('expiry_date');
         });
     }

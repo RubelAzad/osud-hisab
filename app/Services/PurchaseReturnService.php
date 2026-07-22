@@ -75,6 +75,7 @@ class PurchaseReturnService
                     batchId: $item['medicine_batch_id'],
                     type: StockMovement::TYPE_RETURN,
                     qty: -$qty,
+                    locationId: $purchase->location_id,
                     reference: 'purchase_return',
                     referenceId: $purchaseReturn->id,
                 );

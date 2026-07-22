@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BarcodeLabelController;
 use App\Http\Controllers\CashAccountController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
@@ -10,11 +11,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GenericController;
+use App\Http\Controllers\LocationController;
+use App\Http\Controllers\LocationSwitcherController;
 use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\MedicineTypeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PosController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseReturnController;
 use App\Http\Controllers\ReportController;
@@ -22,6 +26,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleReturnController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SuperAdmin\PharmacyController as SuperAdminPharmacyController;
 use App\Http\Controllers\UnitController;
@@ -74,6 +79,15 @@ Route::middleware(['auth', 'identify.pharmacy'])->group(function () {
     $crudResource('generics', GenericController::class, 'generics', ['index', 'create', 'store', 'edit', 'update', 'destroy']);
     $crudResource('medicine-types', MedicineTypeController::class, 'medicine_types', ['index', 'create', 'store', 'edit', 'update', 'destroy']);
     $crudResource('units', UnitController::class, 'units', ['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    // Static /medicines/* sub-paths must be registered before the medicines resource's
+    // /medicines/{medicine} wildcard show route, or the wildcard would swallow them.
+    Route::middleware('permission:medicines.view')->group(function () {
+        Route::get('medicines/barcode-labels', [BarcodeLabelController::class, 'create'])->name('medicines.barcode-labels');
+        Route::get('medicines/barcode-labels/print', [BarcodeLabelController::class, 'print'])->name('medicines.barcode-labels.print');
+        Route::get('medicines/export', [MedicineController::class, 'export'])->name('medicines.export');
+    });
+    Route::middleware('permission:medicines.create')->post('medicines/import', [MedicineController::class, 'import'])->name('medicines.import');
+
     $crudResource('medicines', MedicineController::class, 'medicines');
     $crudResource('suppliers', SupplierController::class, 'suppliers');
     $crudResource('customers', CustomerController::class, 'customers');
@@ -86,6 +100,12 @@ Route::middleware(['auth', 'identify.pharmacy'])->group(function () {
     $crudResource('damaged-medicines', DamagedMedicineController::class, 'damaged_medicines', ['index', 'create', 'store']);
     $crudResource('sale-returns', SaleReturnController::class, 'sale_returns', ['index', 'show']);
     $crudResource('purchase-returns', PurchaseReturnController::class, 'purchase_returns', ['index', 'show']);
+    $crudResource('locations', LocationController::class, 'locations', ['index', 'create', 'store', 'edit', 'update']);
+    $crudResource('stock-transfers', StockTransferController::class, 'stock_transfers', ['index', 'create', 'store', 'show']);
+
+    Route::post('locations/{location}/switch', [LocationSwitcherController::class, 'switch'])->name('locations.switch');
+
+    Route::middleware('permission:sales.view')->get('sales/{sale}/invoice', [SaleController::class, 'downloadInvoice'])->name('sales.invoice');
 
     Route::middleware('permission:sale_returns.create')->group(function () {
         Route::get('sales/{sale}/return', [SaleReturnController::class, 'create'])->name('sales.returns.create');
@@ -128,5 +148,11 @@ Route::middleware(['auth', 'identify.pharmacy'])->group(function () {
     Route::middleware('permission:reports.view')->group(function () {
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/{report}', [ReportController::class, 'show'])->name('reports.show');
+    });
+
+    Route::middleware('permission:sales.create')->group(function () {
+        Route::get('pos', [PosController::class, 'index'])->name('pos.index');
+        Route::post('pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
+        Route::get('pos/receipt/{sale}', [PosController::class, 'receipt'])->name('pos.receipt');
     });
 });
