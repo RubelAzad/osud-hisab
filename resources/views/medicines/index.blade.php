@@ -69,17 +69,53 @@
 
 <div class="idx-filters">
     <form method="GET" class="row g-2 align-items-end">
-        <div class="col-md-5 col-sm-8">
-            <input type="text" name="q" class="form-control" placeholder="Search by name, barcode..." value="{{ request('q') }}">
+        <div class="col-md-3">
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="Search name, barcode..." value="{{ request('q') }}">
+        </div>
+        <div class="col-md-2">
+            <select name="category_id" class="form-select form-select-sm">
+                <option value="">All Categories</option>
+                @foreach(\App\Models\Category::where('status', true)->orderBy('name')->get() as $cat)
+                    <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="manufacturer_id" class="form-select form-select-sm">
+                <option value="">All Brands</option>
+                @foreach(\App\Models\Manufacturer::where('status', true)->orderBy('name')->get() as $m)
+                    <option value="{{ $m->id }}" {{ request('manufacturer_id') == $m->id ? 'selected' : '' }}>{{ $m->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="generic_id" class="form-select form-select-sm">
+                <option value="">All Generics</option>
+                @foreach(\App\Models\Generic::orderBy('name')->get() as $g)
+                    <option value="{{ $g->id }}" {{ request('generic_id') == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="medicine_type_id" class="form-select form-select-sm">
+                <option value="">All Types</option>
+                @foreach(\App\Models\MedicineType::orderBy('name')->get() as $t)
+                    <option value="{{ $t->id }}" {{ request('medicine_type_id') == $t->id ? 'selected' : '' }}>{{ $t->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="stock_status" class="form-select form-select-sm">
+                <option value="">All Stock</option>
+                <option value="in_stock" {{ request('stock_status') === 'in_stock' ? 'selected' : '' }}>In Stock</option>
+                <option value="out_of_stock" {{ request('stock_status') === 'out_of_stock' ? 'selected' : '' }}>Out of Stock</option>
+                <option value="low_stock" {{ request('stock_status') === 'low_stock' ? 'selected' : '' }}>Low Stock</option>
+            </select>
         </div>
         <div class="col-auto">
-            <button class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i>Search</button>
+            <button class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('medicines.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
         </div>
-        @if(request('q'))
-            <div class="col-auto">
-                <a href="{{ route('medicines.index') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x-lg me-1"></i>Clear</a>
-            </div>
-        @endif
     </form>
 </div>
 

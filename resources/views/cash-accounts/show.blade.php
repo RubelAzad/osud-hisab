@@ -10,6 +10,31 @@
     </div>
 </div>
 
+<div class="idx-filters">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <select name="type" class="form-select form-select-sm">
+                <option value="">All Types</option>
+                <option value="sale" {{ request('type') === 'sale' ? 'selected' : '' }}>Sale</option>
+                <option value="purchase" {{ request('type') === 'purchase' ? 'selected' : '' }}>Purchase</option>
+                <option value="expense" {{ request('type') === 'expense' ? 'selected' : '' }}>Expense</option>
+                <option value="payment" {{ request('type') === 'payment' ? 'selected' : '' }}>Payment</option>
+                <option value="opening" {{ request('type') === 'opening' ? 'selected' : '' }}>Opening</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="from" class="form-control form-control-sm" value="{{ request('from') }}">
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="to" class="form-control form-control-sm" value="{{ request('to') }}">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('cash-accounts.show', $cashAccount) }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="card-header bg-white">Transaction History</div>
     <div class="table-responsive">

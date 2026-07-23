@@ -9,15 +9,29 @@ use App\Models\Payment;
 use App\Models\Supplier;
 use App\Services\PaymentService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PaymentController extends Controller
 {
     public function __construct(private readonly PaymentService $paymentService) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $payments = Payment::with(['customer', 'supplier'])->latest('payment_date')->latest('id')->paginate(15);
+        $payments = Payment::with(['customer', 'supplier'])
+            ->latest('payment_date')->latest('id')
+            ->when($request->filled('party_type'), function ($q) use ($request) {
+                if ($request->input('party_type') === 'customer') {
+                    $q->whereNotNull('customer_id');
+                } elseif ($request->input('party_type') === 'supplier') {
+                    $q->whereNotNull('supplier_id');
+                }
+            })
+            ->when($request->filled('payment_method'), fn ($q) => $q->where('payment_method', $request->input('payment_method')))
+            ->when($request->filled('from'), fn ($q) => $q->where('payment_date', '>=', $request->input('from')))
+            ->when($request->filled('to'), fn ($q) => $q->where('payment_date', '<=', $request->input('to')))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('payments.index', compact('payments'));
     }

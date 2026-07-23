@@ -5,13 +5,22 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SupplierRequest;
 use App\Models\Supplier;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class SupplierController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $suppliers = Supplier::latest()->paginate(15);
+        $suppliers = Supplier::latest()
+            ->when($request->filled('q'), fn ($q) => $q->where(function ($q2) use ($request) {
+                $q2->where('name', 'like', '%'.$request->string('q').'%')
+                    ->orWhere('company_name', 'like', '%'.$request->string('q').'%')
+                    ->orWhere('phone', 'like', '%'.$request->string('q').'%');
+            }))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status') === 'active'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('suppliers.index', compact('suppliers'));
     }

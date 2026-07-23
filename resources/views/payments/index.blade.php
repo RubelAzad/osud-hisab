@@ -10,6 +10,37 @@
     </h4>
 </div>
 
+<div class="idx-filters">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-2">
+            <select name="party_type" class="form-select form-select-sm">
+                <option value="">All Parties</option>
+                <option value="customer" {{ request('party_type') === 'customer' ? 'selected' : '' }}>Customers</option>
+                <option value="supplier" {{ request('party_type') === 'supplier' ? 'selected' : '' }}>Suppliers</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="payment_method" class="form-select form-select-sm">
+                <option value="">All Methods</option>
+                <option value="cash" {{ request('payment_method') === 'cash' ? 'selected' : '' }}>Cash</option>
+                <option value="bank_transfer" {{ request('payment_method') === 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                <option value="cheque" {{ request('payment_method') === 'cheque' ? 'selected' : '' }}>Cheque</option>
+                <option value="mobile_banking" {{ request('payment_method') === 'mobile_banking' ? 'selected' : '' }}>Mobile Banking</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="from" class="form-control form-control-sm" value="{{ request('from') }}">
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="to" class="form-control form-control-sm" value="{{ request('to') }}">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('payments.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="table-responsive">
         <table class="table idx-table align-middle mb-0">

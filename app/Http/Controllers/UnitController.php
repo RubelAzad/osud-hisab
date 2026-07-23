@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UnitRequest;
 use App\Models\Unit;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class UnitController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $units = Unit::withCount('medicines')->latest()->paginate(15);
+        $units = Unit::latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('units.index', compact('units'));
     }

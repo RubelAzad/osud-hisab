@@ -5,13 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Requests\TaxRateRequest;
 use App\Models\TaxRate;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class TaxRateController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $taxRates = TaxRate::withCount('medicines')->latest()->paginate(15);
+        $taxRates = TaxRate::withCount('medicines')
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status') === 'active'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('tax-rates.index', compact('taxRates'));
     }

@@ -15,6 +15,25 @@
     </div>
 </div>
 
+<div class="idx-filters">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-2">
+            <select name="is_read" class="form-select form-select-sm">
+                <option value="">All</option>
+                <option value="0" {{ request('is_read') === '0' ? 'selected' : '' }}>Unread</option>
+                <option value="1" {{ request('is_read') === '1' ? 'selected' : '' }}>Read</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="type" class="form-control form-control-sm" placeholder="Filter by type..." value="{{ request('type') }}">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('notifications.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="list-group list-group-flush">
         @forelse ($notifications as $notification)

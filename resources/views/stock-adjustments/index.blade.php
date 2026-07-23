@@ -15,6 +15,31 @@
     </div>
 </div>
 
+<div class="idx-filters">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="Search medicine name..." value="{{ request('q') }}">
+        </div>
+        <div class="col-md-2">
+            <select name="type" class="form-select form-select-sm">
+                <option value="">All Types</option>
+                <option value="increase" {{ request('type') === 'increase' ? 'selected' : '' }}>Increase</option>
+                <option value="decrease" {{ request('type') === 'decrease' ? 'selected' : '' }}>Decrease</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="from" class="form-control form-control-sm" value="{{ request('from') }}">
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="to" class="form-control form-control-sm" value="{{ request('to') }}">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('stock-adjustments.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="table-responsive">
         <table class="table idx-table align-middle mb-0">

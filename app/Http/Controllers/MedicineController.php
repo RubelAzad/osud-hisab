@@ -27,7 +27,25 @@ class MedicineController extends Controller
     {
         $medicines = Medicine::with(['category', 'manufacturer', 'unit'])
             ->withSum('batches as total_stock', 'remaining_qty')
-            ->when($request->filled('q'), fn ($q) => $q->where('medicine_name', 'like', '%'.$request->q.'%'))
+            ->when($request->filled('q'), function ($q) use ($request) {
+                $q->where(function ($q2) use ($request) {
+                    $q2->where('medicine_name', 'like', '%'.$request->string('q').'%')
+                        ->orWhere('barcode', 'like', '%'.$request->string('q').'%');
+                });
+            })
+            ->when($request->filled('category_id'), fn ($q) => $q->where('category_id', $request->integer('category_id')))
+            ->when($request->filled('manufacturer_id'), fn ($q) => $q->where('manufacturer_id', $request->integer('manufacturer_id')))
+            ->when($request->filled('generic_id'), fn ($q) => $q->where('generic_id', $request->integer('generic_id')))
+            ->when($request->filled('medicine_type_id'), fn ($q) => $q->where('medicine_type_id', $request->integer('medicine_type_id')))
+            ->when($request->filled('stock_status'), function ($q) use ($request) {
+                if ($request->input('stock_status') === 'in_stock') {
+                    $q->having('total_stock', '>', 0);
+                } elseif ($request->input('stock_status') === 'out_of_stock') {
+                    $q->having('total_stock', '<=', 0);
+                } elseif ($request->input('stock_status') === 'low_stock') {
+                    $q->havingColumn('total_stock', '<=', 'medicines.minimum_stock');
+                }
+            })
             ->latest()
             ->paginate(15)
             ->withQueryString();

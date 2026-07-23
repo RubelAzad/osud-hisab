@@ -22,9 +22,24 @@ class SaleController extends Controller
 {
     public function __construct(private readonly SaleService $saleService) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $sales = Sale::with(['customer', 'location'])->latest()->paginate(15);
+        $sales = Sale::with(['customer', 'location'])
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('invoice_no', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('customer_id'), fn ($q) => $q->where('customer_id', $request->integer('customer_id')))
+            ->when($request->filled('location_id'), fn ($q) => $q->where('location_id', $request->integer('location_id')))
+            ->when($request->filled('from'), fn ($q) => $q->where('sale_date', '>=', $request->input('from')))
+            ->when($request->filled('to'), fn ($q) => $q->where('sale_date', '<=', $request->input('to')))
+            ->when($request->filled('payment_status'), function ($q) use ($request) {
+                if ($request->input('payment_status') === 'paid') {
+                    $q->where('due', '<=', 0);
+                } elseif ($request->input('payment_status') === 'due') {
+                    $q->where('due', '>', 0);
+                }
+            })
+            ->paginate(15)
+            ->withQueryString();
 
         return view('sales.index', compact('sales'));
     }

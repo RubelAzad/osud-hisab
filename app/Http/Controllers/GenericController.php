@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\GenericRequest;
 use App\Models\Generic;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class GenericController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $generics = Generic::withCount('medicines')->latest()->paginate(15);
+        $generics = Generic::latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('generics.index', compact('generics'));
     }

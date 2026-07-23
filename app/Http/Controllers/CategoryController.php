@@ -5,13 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $categories = Category::withCount('medicines')->latest()->paginate(15);
+        $categories = Category::withCount('medicines')
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status') === 'active'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('categories.index', compact('categories'));
     }

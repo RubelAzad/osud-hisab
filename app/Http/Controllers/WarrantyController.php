@@ -5,13 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Requests\WarrantyRequest;
 use App\Models\Warranty;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class WarrantyController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $warranties = Warranty::withCount('medicines')->latest()->paginate(15);
+        $warranties = Warranty::withCount('medicines')
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('warranties.index', compact('warranties'));
     }

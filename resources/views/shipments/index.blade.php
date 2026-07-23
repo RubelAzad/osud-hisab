@@ -10,6 +10,36 @@
     </h4>
 </div>
 
+<div class="idx-filters">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-2">
+            <select name="shipping_status" class="form-select form-select-sm">
+                <option value="">All Status</option>
+                <option value="pending" {{ request('shipping_status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="shipped" {{ request('shipping_status') === 'shipped' ? 'selected' : '' }}>Shipped</option>
+                <option value="delivered" {{ request('shipping_status') === 'delivered' ? 'selected' : '' }}>Delivered</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="payment_status" class="form-select form-select-sm">
+                <option value="">All Payment</option>
+                <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>Paid</option>
+                <option value="due" {{ request('payment_status') === 'due' ? 'selected' : '' }}>Due</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="from" class="form-control form-control-sm" value="{{ request('from') }}">
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="to" class="form-control form-control-sm" value="{{ request('to') }}">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('shipments.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="table-responsive">
         <table class="table idx-table align-middle mb-0">

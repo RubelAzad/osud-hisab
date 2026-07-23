@@ -9,15 +9,23 @@ use App\Models\Medicine;
 use App\Models\StockTransfer;
 use App\Services\StockTransferService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class StockTransferController extends Controller
 {
     public function __construct(private readonly StockTransferService $service) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $stockTransfers = StockTransfer::with(['fromLocation', 'toLocation'])->latest()->paginate(15);
+        $stockTransfers = StockTransfer::with(['fromLocation', 'toLocation'])
+            ->latest()
+            ->when($request->filled('from_location_id'), fn ($q) => $q->where('from_location_id', $request->integer('from_location_id')))
+            ->when($request->filled('to_location_id'), fn ($q) => $q->where('to_location_id', $request->integer('to_location_id')))
+            ->when($request->filled('from'), fn ($q) => $q->where('transfer_date', '>=', $request->input('from')))
+            ->when($request->filled('to'), fn ($q) => $q->where('transfer_date', '<=', $request->input('to')))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('stock-transfers.index', compact('stockTransfers'));
     }

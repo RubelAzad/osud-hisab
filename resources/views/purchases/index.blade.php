@@ -15,6 +15,47 @@
     </div>
 </div>
 
+<div class="idx-filters">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-2">
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="Invoice #..." value="{{ request('q') }}">
+        </div>
+        <div class="col-md-2">
+            <select name="supplier_id" class="form-select form-select-sm">
+                <option value="">All Suppliers</option>
+                @foreach(\App\Models\Supplier::where('status', true)->orderBy('name')->get() as $s)
+                    <option value="{{ $s->id }}" {{ request('supplier_id') == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="location_id" class="form-select form-select-sm">
+                <option value="">All Locations</option>
+                @foreach(\App\Models\Location::where('status', true)->orderBy('name')->get() as $loc)
+                    <option value="{{ $loc->id }}" {{ request('location_id') == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="from" class="form-control form-control-sm" value="{{ request('from') }}">
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="to" class="form-control form-control-sm" value="{{ request('to') }}">
+        </div>
+        <div class="col-md-2">
+            <select name="payment_status" class="form-select form-select-sm">
+                <option value="">All Payment</option>
+                <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>Paid</option>
+                <option value="due" {{ request('payment_status') === 'due' ? 'selected' : '' }}>Due</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('purchases.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="table-responsive">
         <table class="table idx-table align-middle mb-0">

@@ -5,13 +5,18 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CustomerGroupRequest;
 use App\Models\CustomerGroup;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CustomerGroupController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $customerGroups = CustomerGroup::withCount('customers')->latest()->paginate(15);
+        $customerGroups = CustomerGroup::withCount('customers')
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('customer-groups.index', compact('customerGroups'));
     }

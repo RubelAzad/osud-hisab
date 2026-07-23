@@ -6,13 +6,22 @@ use App\Http\Requests\CustomerRequest;
 use App\Models\Customer;
 use App\Models\CustomerGroup;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CustomerController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $customers = Customer::latest()->paginate(15);
+        $customers = Customer::latest()
+            ->when($request->filled('q'), fn ($q) => $q->where(function ($q2) use ($request) {
+                $q2->where('name', 'like', '%'.$request->string('q').'%')
+                    ->orWhere('phone', 'like', '%'.$request->string('q').'%')
+                    ->orWhere('email', 'like', '%'.$request->string('q').'%');
+            }))
+            ->when($request->filled('customer_group_id'), fn ($q) => $q->where('customer_group_id', $request->integer('customer_group_id')))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('customers.index', compact('customers'));
     }

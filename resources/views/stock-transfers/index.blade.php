@@ -15,6 +15,37 @@
     </div>
 </div>
 
+<div class="idx-filters">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-2">
+            <select name="from_location_id" class="form-select form-select-sm">
+                <option value="">From Location</option>
+                @foreach(\App\Models\Location::where('status', true)->orderBy('name')->get() as $loc)
+                    <option value="{{ $loc->id }}" {{ request('from_location_id') == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="to_location_id" class="form-select form-select-sm">
+                <option value="">To Location</option>
+                @foreach(\App\Models\Location::where('status', true)->orderBy('name')->get() as $loc)
+                    <option value="{{ $loc->id }}" {{ request('to_location_id') == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="from" class="form-control form-control-sm" value="{{ request('from') }}">
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="to" class="form-control form-control-sm" value="{{ request('to') }}">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('stock-transfers.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="table-responsive">
         <table class="table idx-table align-middle mb-0">

@@ -11,9 +11,14 @@ use Illuminate\View\View;
 
 class PriceGroupController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $priceGroups = PriceGroup::withCount('medicines')->latest()->paginate(15);
+        $priceGroups = PriceGroup::withCount('medicines')
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status') === 'active'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('price-groups.index', compact('priceGroups'));
     }

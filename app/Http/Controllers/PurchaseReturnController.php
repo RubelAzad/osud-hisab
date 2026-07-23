@@ -8,15 +8,22 @@ use App\Models\Purchase;
 use App\Models\PurchaseReturn;
 use App\Services\PurchaseReturnService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PurchaseReturnController extends Controller
 {
     public function __construct(private readonly PurchaseReturnService $service) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $purchaseReturns = PurchaseReturn::with(['purchase', 'supplier'])->latest()->paginate(15);
+        $purchaseReturns = PurchaseReturn::with(['purchase', 'supplier'])
+            ->latest()
+            ->when($request->filled('supplier_id'), fn ($q) => $q->where('supplier_id', $request->integer('supplier_id')))
+            ->when($request->filled('from'), fn ($q) => $q->where('return_date', '>=', $request->input('from')))
+            ->when($request->filled('to'), fn ($q) => $q->where('return_date', '<=', $request->input('to')))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('purchase-returns.index', compact('purchaseReturns'));
     }

@@ -8,15 +8,22 @@ use App\Models\DamagedMedicine;
 use App\Models\Medicine;
 use App\Services\DamagedMedicineService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DamagedMedicineController extends Controller
 {
     public function __construct(private readonly DamagedMedicineService $service) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $damagedMedicines = DamagedMedicine::with(['medicineBatch.medicine'])->latest()->paginate(15);
+        $damagedMedicines = DamagedMedicine::with(['medicineBatch.medicine'])
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->whereHas('medicineBatch.medicine', fn ($q2) => $q2->where('medicine_name', 'like', '%'.$request->string('q').'%')))
+            ->when($request->filled('from'), fn ($q) => $q->where('created_at', '>=', $request->input('from')))
+            ->when($request->filled('to'), fn ($q) => $q->where('created_at', '<=', $request->input('to').' 23:59:59'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('damaged-medicines.index', compact('damagedMedicines'));
     }

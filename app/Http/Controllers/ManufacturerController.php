@@ -5,13 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ManufacturerRequest;
 use App\Models\Manufacturer;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ManufacturerController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $manufacturers = Manufacturer::withCount('medicines')->latest()->paginate(15);
+        $manufacturers = Manufacturer::withCount('medicines')
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status') === 'active'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('manufacturers.index', compact('manufacturers'));
     }

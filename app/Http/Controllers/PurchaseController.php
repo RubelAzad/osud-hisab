@@ -10,15 +10,31 @@ use App\Models\Purchase;
 use App\Models\Supplier;
 use App\Services\PurchaseService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PurchaseController extends Controller
 {
     public function __construct(private readonly PurchaseService $purchaseService) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $purchases = Purchase::with(['supplier', 'location'])->latest()->paginate(15);
+        $purchases = Purchase::with(['supplier', 'location'])
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('invoice_no', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('supplier_id'), fn ($q) => $q->where('supplier_id', $request->integer('supplier_id')))
+            ->when($request->filled('location_id'), fn ($q) => $q->where('location_id', $request->integer('location_id')))
+            ->when($request->filled('from'), fn ($q) => $q->where('purchase_date', '>=', $request->input('from')))
+            ->when($request->filled('to'), fn ($q) => $q->where('purchase_date', '<=', $request->input('to')))
+            ->when($request->filled('payment_status'), function ($q) use ($request) {
+                if ($request->input('payment_status') === 'paid') {
+                    $q->where('due', '<=', 0);
+                } elseif ($request->input('payment_status') === 'due') {
+                    $q->where('due', '>', 0);
+                }
+            })
+            ->paginate(15)
+            ->withQueryString();
 
         return view('purchases.index', compact('purchases'));
     }

@@ -11,6 +11,7 @@ use App\Models\Medicine;
 use App\Models\Quotation;
 use App\Services\QuotationService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DraftController extends Controller
@@ -19,12 +20,17 @@ class DraftController extends Controller
 
     public function __construct(private readonly QuotationService $service) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $drafts = Quotation::with(['customer', 'location'])
             ->where('type', self::TYPE)
             ->latest()
-            ->paginate(15);
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status')))
+            ->when($request->filled('customer_id'), fn ($q) => $q->where('customer_id', $request->integer('customer_id')))
+            ->when($request->filled('from'), fn ($q) => $q->where('quotation_date', '>=', $request->input('from')))
+            ->when($request->filled('to'), fn ($q) => $q->where('quotation_date', '<=', $request->input('to')))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('drafts.index', compact('drafts'));
     }

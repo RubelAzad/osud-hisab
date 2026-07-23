@@ -6,14 +6,26 @@ use App\Http\Requests\UserRequest;
 use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $users = User::with('roles')->where('pharmacy_id', currentPharmacyId())->latest()->paginate(15);
+        $users = User::with('roles')
+            ->where('pharmacy_id', currentPharmacyId())
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->where(function ($q2) use ($request) {
+                $q2->where('name', 'like', '%'.$request->string('q').'%')
+                    ->orWhere('email', 'like', '%'.$request->string('q').'%')
+                    ->orWhere('phone', 'like', '%'.$request->string('q').'%');
+            }))
+            ->when($request->filled('role'), fn ($q) => $q->role($request->input('role')))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status') === 'active'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('users.index', compact('users'));
     }

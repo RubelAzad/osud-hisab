@@ -8,15 +8,22 @@ use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Services\SaleReturnService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class SaleReturnController extends Controller
 {
     public function __construct(private readonly SaleReturnService $service) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $saleReturns = SaleReturn::with(['sale', 'customer'])->latest()->paginate(15);
+        $saleReturns = SaleReturn::with(['sale', 'customer'])
+            ->latest()
+            ->when($request->filled('customer_id'), fn ($q) => $q->where('customer_id', $request->integer('customer_id')))
+            ->when($request->filled('from'), fn ($q) => $q->where('return_date', '>=', $request->input('from')))
+            ->when($request->filled('to'), fn ($q) => $q->where('return_date', '<=', $request->input('to')))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('sale-returns.index', compact('saleReturns'));
     }

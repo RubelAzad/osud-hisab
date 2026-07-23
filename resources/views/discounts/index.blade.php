@@ -15,6 +15,40 @@
     </div>
 </div>
 
+<div class="idx-filters">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="Search name..." value="{{ request('q') }}">
+        </div>
+        <div class="col-md-2">
+            <select name="type" class="form-select form-select-sm">
+                <option value="">All Types</option>
+                <option value="percentage" {{ request('type') === 'percentage' ? 'selected' : '' }}>Percentage</option>
+                <option value="fixed" {{ request('type') === 'fixed' ? 'selected' : '' }}>Fixed</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="applies_to" class="form-select form-select-sm">
+                <option value="">All Scope</option>
+                <option value="all" {{ request('applies_to') === 'all' ? 'selected' : '' }}>All Products</option>
+                <option value="category" {{ request('applies_to') === 'category' ? 'selected' : '' }}>Category</option>
+                <option value="medicine" {{ request('applies_to') === 'medicine' ? 'selected' : '' }}>Medicine</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="status" class="form-select form-select-sm">
+                <option value="">All Status</option>
+                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('discounts.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="table-responsive">
         <table class="table idx-table align-middle mb-0">

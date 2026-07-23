@@ -7,13 +7,21 @@ use App\Models\Category;
 use App\Models\Discount;
 use App\Models\Medicine;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class DiscountController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $discounts = Discount::with(['category', 'medicine'])->latest()->paginate(15);
+        $discounts = Discount::with(['category', 'medicine'])
+            ->latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->when($request->filled('type'), fn ($q) => $q->where('type', $request->input('type')))
+            ->when($request->filled('applies_to'), fn ($q) => $q->where('applies_to', $request->input('applies_to')))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->input('status') === 'active'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('discounts.index', compact('discounts'));
     }

@@ -15,6 +15,26 @@
     </div>
 </div>
 
+<div class="idx-filters">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <input type="text" name="q" class="form-control form-control-sm" placeholder="Search name, phone, email..." value="{{ request('q') }}">
+        </div>
+        <div class="col-md-3">
+            <select name="customer_group_id" class="form-select form-select-sm">
+                <option value="">All Groups</option>
+                @foreach(\App\Models\CustomerGroup::orderBy('name')->get() as $g)
+                    <option value="{{ $g->id }}" {{ request('customer_group_id') == $g->id ? 'selected' : '' }}>{{ $g->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-sm btn-primary">Filter</button>
+            <a href="{{ route('customers.index') }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
 <div class="card">
     <div class="table-responsive">
         <table class="table idx-table align-middle mb-0">

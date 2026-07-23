@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\MedicineTypeRequest;
 use App\Models\MedicineType;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MedicineTypeController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $medicineTypes = MedicineType::withCount('medicines')->latest()->paginate(15);
+        $medicineTypes = MedicineType::latest()
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->paginate(15)
+            ->withQueryString();
 
         return view('medicine-types.index', compact('medicineTypes'));
     }
