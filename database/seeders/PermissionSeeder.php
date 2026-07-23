@@ -13,6 +13,7 @@ class PermissionSeeder extends Seeder
         'sale_returns', 'purchase_returns', 'payments', 'expense_categories', 'expenses',
         'cash_accounts', 'damaged_medicines', 'notifications', 'settings', 'reports',
         'users', 'roles', 'locations', 'stock_transfers',
+        'stock_adjustments', 'cheques', 'activity_logs', 'quotations', 'drafts',
     ];
 
     private const ACTIONS = ['view', 'create', 'edit', 'delete'];

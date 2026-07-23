@@ -59,6 +59,30 @@
                     <label class="form-label">Note</label>
                     <input type="text" name="note" class="form-control" value="{{ old('note') }}">
                 </div>
+                @if ($priceGroups->count())
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Price Group</label>
+                        <select class="form-select" onchange="window.location = '{{ route('sales.create') }}' + (this.value ? '?price_group_id=' + this.value : '')">
+                            <option value="">Base Price</option>
+                            @foreach ($priceGroups as $priceGroup)
+                                <option value="{{ $priceGroup->id }}" {{ request('price_group_id') == $priceGroup->id ? 'selected' : '' }}>{{ $priceGroup->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+                @if ($activeDiscounts->count())
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Apply Discount</label>
+                        <select class="form-select" id="discount-picker">
+                            <option value="">None</option>
+                            @foreach ($activeDiscounts as $discount)
+                                <option value="{{ $discount->id }}" data-type="{{ $discount->type }}" data-value="{{ $discount->value }}" data-applies-to="{{ $discount->applies_to }}" data-medicine-id="{{ $discount->medicine_id }}" data-category-id="{{ $discount->category_id }}">
+                                    {{ $discount->name }} ({{ $discount->type === 'percentage' ? $discount->value.'%' : number_format($discount->value, 2) }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

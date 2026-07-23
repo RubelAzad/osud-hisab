@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Cheque;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Supplier;
@@ -15,6 +16,7 @@ class PaymentService
     {
         return DB::transaction(function () use ($customer, $data) {
             $payment = Payment::create(array_merge($data, ['customer_id' => $customer->id]));
+            $this->recordChequeIfApplicable($payment, $data);
 
             Customer::whereKey($customer->id)->decrement('balance', (float) $data['amount']);
 
@@ -36,6 +38,7 @@ class PaymentService
     {
         return DB::transaction(function () use ($supplier, $data) {
             $payment = Payment::create(array_merge($data, ['supplier_id' => $supplier->id]));
+            $this->recordChequeIfApplicable($payment, $data);
 
             Supplier::whereKey($supplier->id)->decrement('balance', (float) $data['amount']);
 
@@ -51,5 +54,20 @@ class PaymentService
 
             return $payment;
         });
+    }
+
+    private function recordChequeIfApplicable(Payment $payment, array $data): void
+    {
+        if (($data['payment_method'] ?? null) !== 'cheque') {
+            return;
+        }
+
+        Cheque::create([
+            'payment_id' => $payment->id,
+            'cheque_no' => $data['cheque_no'],
+            'bank_name' => $data['bank_name'],
+            'cheque_date' => $data['cheque_date'],
+            'due_date' => $data['due_date'],
+        ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CustomerRequest extends FormRequest
 {
@@ -19,6 +20,7 @@ class CustomerRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string'],
             'opening_balance' => [$this->isMethod('post') ? 'required' : 'sometimes', 'numeric'],
+            'customer_group_id' => ['nullable', Rule::exists('customer_groups', 'id')->where('pharmacy_id', currentPharmacyId())],
         ];
     }
 }

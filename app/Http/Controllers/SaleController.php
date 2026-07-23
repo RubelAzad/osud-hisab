@@ -4,13 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\InsufficientStockException;
 use App\Http\Requests\SaleRequest;
+use App\Models\ActivityLog;
 use App\Models\Customer;
+use App\Models\Discount;
 use App\Models\Location;
 use App\Models\Medicine;
+use App\Models\PriceGroup;
 use App\Models\Sale;
 use App\Services\SaleService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SaleController extends Controller
@@ -24,24 +29,29 @@ class SaleController extends Controller
         return view('sales.index', compact('sales'));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         $locationId = currentLocationId();
+        $priceGroupId = $request->integer('price_group_id') ?: null;
 
         $medicines = Medicine::where('status', true)
             ->withSum(['batches as total_stock' => fn ($q) => $q->where('location_id', $locationId)], 'remaining_qty')
             ->having('total_stock', '>', 0)
+            ->with(['priceGroups' => fn ($q) => $priceGroupId ? $q->where('price_groups.id', $priceGroupId) : $q->whereRaw('1=0')])
             ->orderBy('medicine_name')
             ->get();
 
         return view('sales.create', [
             'customers' => Customer::orderBy('name')->get(),
             'locations' => Location::where('status', true)->orderBy('name')->get(),
+            'priceGroups' => PriceGroup::where('status', true)->orderBy('name')->get(),
+            'activeDiscounts' => Discount::where('status', true)->get()->filter->isActive()->values(),
             'medicinesJson' => $medicines->map(fn (Medicine $m) => [
                 'id' => $m->id,
                 'name' => $m->medicine_name.' '.$m->strength,
-                'price' => $m->sale_price,
+                'price' => $priceGroupId && $m->priceGroups->isNotEmpty() ? $m->priceGroups->first()->pivot->price : $m->sale_price,
                 'stock' => $m->total_stock,
+                'category_id' => $m->category_id,
             ])->values(),
         ]);
     }
@@ -56,6 +66,8 @@ class SaleController extends Controller
         } catch (InsufficientStockException $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
+
+        ActivityLog::record('created', $sale);
 
         return redirect()->route('sales.show', $sale)->with('success', 'Sale recorded.');
     }
@@ -74,5 +86,20 @@ class SaleController extends Controller
         $pdf = Pdf::loadView('pdf.invoice', ['sale' => $sale, 'pharmacy' => currentPharmacy()]);
 
         return $pdf->download("invoice-{$sale->invoice_no}.pdf");
+    }
+
+    public function updateShippingStatus(Request $request, Sale $sale): RedirectResponse
+    {
+        $data = $request->validate([
+            'shipping_status' => ['required', Rule::in(['pending', 'shipped', 'delivered'])],
+            'shipping_address' => ['nullable', 'string'],
+        ]);
+
+        $data['shipped_at'] = $data['shipping_status'] === 'shipped' ? now() : $sale->shipped_at;
+
+        $sale->update($data);
+        ActivityLog::record('updated', $sale);
+
+        return back()->with('success', 'Shipping status updated.');
     }
 }

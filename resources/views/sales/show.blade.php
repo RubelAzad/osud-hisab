@@ -24,6 +24,32 @@
     <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Due</div><div class="fw-semibold">{{ number_format($sale->due, 2) }}</div></div></div></div>
 </div>
 
+@can('sales.edit')
+<div class="card mb-3">
+    <div class="card-header bg-white">Shipping</div>
+    <div class="card-body">
+        <form method="POST" action="{{ route('sales.shipping-status', $sale) }}" class="row g-2 align-items-end">
+            @csrf @method('PATCH')
+            <div class="col-md-3">
+                <label class="form-label">Shipping Status</label>
+                <select name="shipping_status" class="form-select">
+                    <option value="pending" {{ $sale->shipping_status === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="shipped" {{ $sale->shipping_status === 'shipped' ? 'selected' : '' }}>Shipped</option>
+                    <option value="delivered" {{ $sale->shipping_status === 'delivered' ? 'selected' : '' }}>Delivered</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Shipping Address</label>
+                <input type="text" name="shipping_address" class="form-control" value="{{ $sale->shipping_address }}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary">Update Shipping</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endcan
+
 <div class="card">
     <div class="card-header bg-white">Items</div>
     <div class="table-responsive">

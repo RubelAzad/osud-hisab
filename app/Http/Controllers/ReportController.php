@@ -17,6 +17,7 @@ class ReportController extends Controller
         'customer-due' => ['title' => 'Customer Due', 'method' => 'customerDue', 'filter' => 'none'],
         'stock' => ['title' => 'Stock Report', 'method' => 'stock', 'filter' => 'none'],
         'low-stock' => ['title' => 'Low Stock', 'method' => 'lowStock', 'filter' => 'none'],
+        'out-of-stock' => ['title' => 'Out of Stock', 'method' => 'outOfStock', 'filter' => 'none'],
         'expired' => ['title' => 'Expired Medicines', 'method' => 'expired', 'filter' => 'none'],
         'near-expiry' => ['title' => 'Near Expiry', 'method' => 'nearExpiry', 'filter' => 'days'],
         'vat' => ['title' => 'VAT Report', 'method' => 'vat', 'filter' => 'range'],

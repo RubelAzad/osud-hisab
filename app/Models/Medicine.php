@@ -3,18 +3,20 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToPharmacy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Medicine extends Model
 {
-    use BelongsToPharmacy;
+    use BelongsToPharmacy, HasFactory;
 
     protected $fillable = [
         'pharmacy_id', 'category_id', 'manufacturer_id', 'generic_id', 'medicine_type_id', 'unit_id',
         'barcode', 'medicine_name', 'strength', 'purchase_price', 'sale_price',
-        'minimum_stock', 'vat', 'status', 'image', 'description',
+        'minimum_stock', 'vat', 'status', 'image', 'description', 'warranty_id', 'tax_rate_id',
     ];
 
     protected $casts = [
@@ -47,6 +49,23 @@ class Medicine extends Model
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
+    }
+
+    public function warranty(): BelongsTo
+    {
+        return $this->belongsTo(Warranty::class);
+    }
+
+    public function taxRate(): BelongsTo
+    {
+        return $this->belongsTo(TaxRate::class);
+    }
+
+    public function priceGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(PriceGroup::class, 'medicine_price_group_prices')
+            ->withPivot('price')
+            ->withTimestamps();
     }
 
     public function batches(): HasMany

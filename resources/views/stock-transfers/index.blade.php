@@ -3,33 +3,51 @@
 @section('title', 'Stock Transfers')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Stock Transfers</h4>
-    @can('stock_transfers.create')
-        <a href="{{ route('stock-transfers.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> New Transfer</a>
-    @endcan
+<div class="idx-header">
+    <h4 class="mb-0">
+        <i class="bi bi-arrow-left-right text-primary me-2"></i>Stock Transfers
+        <span class="idx-count">{{ $stockTransfers->total() }}</span>
+    </h4>
+    <div class="idx-actions">
+        @can('stock_transfers.create')
+            <a href="{{ route('stock-transfers.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New Transfer</a>
+        @endcan
+    </div>
 </div>
 
 <div class="card">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr><th>Date</th><th>From</th><th>To</th><th>Note</th></tr>
+        <table class="table idx-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Note</th>
+                </tr>
             </thead>
             <tbody>
                 @forelse ($stockTransfers as $transfer)
                     <tr>
-                        <td><a href="{{ route('stock-transfers.show', $transfer) }}">{{ $transfer->transfer_date->format('Y-m-d') }}</a></td>
+                        <td><a href="{{ route('stock-transfers.show', $transfer) }}">{{ $transfer->transfer_date->format('d M Y') }}</a></td>
                         <td>{{ $transfer->fromLocation->name ?? '-' }}</td>
                         <td>{{ $transfer->toLocation->name ?? '-' }}</td>
-                        <td class="text-muted">{{ Str::limit($transfer->note, 40) }}</td>
+                        <td class="text-muted-2">{{ Str::limit($transfer->note, 40) ?: '-' }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" class="text-center text-muted py-4">No stock transfers yet.</td></tr>
+                    <tr>
+                        <td colspan="4">
+                            <div class="idx-empty">
+                                <i class="bi bi-arrow-left-right"></i>
+                                <p>No stock transfers found</p>
+                            </div>
+                        </td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
-<div class="mt-3">{{ $stockTransfers->links() }}</div>
+
+{{ $stockTransfers->links() }}
 @endsection

@@ -128,12 +128,31 @@ class ReportService
     public function lowStock(): array
     {
         $medicines = Medicine::withSum('batches as total_stock', 'remaining_qty')
-            ->havingRaw('COALESCE(total_stock, 0) <= minimum_stock')
+            ->havingRaw('COALESCE(total_stock, 0) <= minimum_stock AND COALESCE(total_stock, 0) > 0')
             ->orderBy('total_stock')->get();
 
         return [
             'columns' => ['Medicine', 'Stock', 'Minimum Stock'],
             'rows' => $medicines->map(fn (Medicine $m) => [$m->medicine_name, $m->total_stock ?? 0, $m->minimum_stock])->all(),
+        ];
+    }
+
+    public function outOfStock(): array
+    {
+        $medicines = Medicine::withSum('batches as total_stock', 'remaining_qty')
+            ->havingRaw('COALESCE(total_stock, 0) <= 0')
+            ->orderBy('medicine_name')->get();
+
+        return [
+            'columns' => ['Medicine', 'Category', 'Manufacturer', 'Sale Price'],
+            'rows' => $medicines->map(fn (Medicine $m) => [
+                $m->medicine_name,
+                $m->category->name ?? '-',
+                $m->manufacturer->name ?? '-',
+                number_format($m->sale_price, 2),
+            ])->all(),
+            'total_label' => 'Total Out of Stock',
+            'total_value' => $medicines->count() . ' medicines',
         ];
     }
 

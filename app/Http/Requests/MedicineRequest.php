@@ -30,6 +30,8 @@ class MedicineRequest extends FormRequest
             'status' => ['required', 'boolean'],
             'image' => ['nullable', 'image', 'max:2048'],
             'description' => ['nullable', 'string'],
+            'warranty_id' => ['nullable', Rule::exists('warranties', 'id')->where('pharmacy_id', currentPharmacyId())],
+            'tax_rate_id' => ['nullable', Rule::exists('tax_rates', 'id')->where('pharmacy_id', currentPharmacyId())],
         ];
     }
 }

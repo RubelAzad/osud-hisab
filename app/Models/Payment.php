@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToPharmacy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Payment extends Model
 {
@@ -38,5 +39,10 @@ class Payment extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function cheque(): HasOne
+    {
+        return $this->hasOne(Cheque::class);
     }
 }

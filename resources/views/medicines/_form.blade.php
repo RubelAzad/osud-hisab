@@ -70,6 +70,24 @@
         <label class="form-label">Minimum Stock</label>
         <input type="number" name="minimum_stock" class="form-control" value="{{ old('minimum_stock', $medicine->minimum_stock ?? 0) }}" required>
     </div>
+    <div class="col-md-4 mb-3">
+        <label class="form-label">Warranty</label>
+        <select name="warranty_id" class="form-select">
+            <option value="">None</option>
+            @foreach ($warranties as $warranty)
+                <option value="{{ $warranty->id }}" {{ old('warranty_id', $medicine->warranty_id ?? '') == $warranty->id ? 'selected' : '' }}>{{ $warranty->name }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div class="col-md-4 mb-3">
+        <label class="form-label">Tax Rate</label>
+        <select name="tax_rate_id" class="form-select">
+            <option value="">None (use VAT % below)</option>
+            @foreach ($taxRates as $taxRate)
+                <option value="{{ $taxRate->id }}" {{ old('tax_rate_id', $medicine->tax_rate_id ?? '') == $taxRate->id ? 'selected' : '' }}>{{ $taxRate->name }} ({{ $taxRate->rate }}%)</option>
+            @endforeach
+        </select>
+    </div>
 
     <div class="col-md-3 mb-3">
         <label class="form-label">Purchase Price</label>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CustomerRequest;
 use App\Models\Customer;
+use App\Models\CustomerGroup;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -18,7 +19,7 @@ class CustomerController extends Controller
 
     public function create(): View
     {
-        return view('customers.create');
+        return view('customers.create', ['customerGroups' => CustomerGroup::orderBy('name')->get()]);
     }
 
     public function store(CustomerRequest $request): RedirectResponse
@@ -41,7 +42,7 @@ class CustomerController extends Controller
 
     public function edit(Customer $customer): View
     {
-        return view('customers.edit', compact('customer'));
+        return view('customers.edit', ['customer' => $customer, 'customerGroups' => CustomerGroup::orderBy('name')->get()]);
     }
 
     public function update(CustomerRequest $request, Customer $customer): RedirectResponse

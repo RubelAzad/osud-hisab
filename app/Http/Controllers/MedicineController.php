@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Exports\MedicinesExport;
 use App\Http\Requests\MedicineRequest;
 use App\Imports\MedicinesImport;
+use App\Imports\OpeningStockImport;
+use App\Models\ActivityLog;
 use App\Models\Category;
 use App\Models\Generic;
 use App\Models\Manufacturer;
 use App\Models\Medicine;
 use App\Models\MedicineType;
+use App\Models\TaxRate;
 use App\Models\Unit;
+use App\Models\Warranty;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -48,7 +52,8 @@ class MedicineController extends Controller
             $data['barcode'] = 'MED'.str_pad((string) (Medicine::max('id') + 1), 8, '0', STR_PAD_LEFT);
         }
 
-        Medicine::create($data);
+        $medicine = Medicine::create($data);
+        ActivityLog::record('created', $medicine);
 
         return redirect()->route('medicines.index')->with('success', 'Medicine created.');
     }
@@ -78,6 +83,7 @@ class MedicineController extends Controller
         }
 
         $medicine->update($data);
+        ActivityLog::record('updated', $medicine);
 
         return redirect()->route('medicines.index')->with('success', 'Medicine updated.');
     }
@@ -88,6 +94,7 @@ class MedicineController extends Controller
             return back()->with('error', 'Cannot delete a medicine that has purchase/stock history.');
         }
 
+        ActivityLog::record('deleted', $medicine);
         $medicine->delete();
 
         return redirect()->route('medicines.index')->with('success', 'Medicine deleted.');
@@ -111,6 +118,17 @@ class MedicineController extends Controller
             ->with('success', "Imported {$import->imported} medicines ({$import->skipped} skipped — either a duplicate barcode or an unrecognized category/manufacturer/generic/unit/type name).");
     }
 
+    public function importOpeningStock(Request $request): RedirectResponse
+    {
+        $request->validate(['file' => ['required', 'file', 'mimes:xlsx,xls,csv']]);
+
+        $import = new OpeningStockImport;
+        Excel::import($import, $request->file('file'));
+
+        return redirect()->route('medicines.index')
+            ->with('success', "Imported opening stock for {$import->imported} rows ({$import->skipped} skipped — either an unrecognized medicine/location or a zero quantity).");
+    }
+
     private function formData(): array
     {
         return [
@@ -119,6 +137,8 @@ class MedicineController extends Controller
             'generics' => Generic::orderBy('name')->get(),
             'medicineTypes' => MedicineType::orderBy('name')->get(),
             'units' => Unit::orderBy('name')->get(),
+            'warranties' => Warranty::orderBy('name')->get(),
+            'taxRates' => TaxRate::where('status', true)->orderBy('name')->get(),
         ];
     }
 }

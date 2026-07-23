@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PurchaseRequest;
+use App\Models\ActivityLog;
 use App\Models\Location;
 use App\Models\Medicine;
 use App\Models\Purchase;
@@ -44,6 +45,8 @@ class PurchaseController extends Controller
         $data['location_id'] = $data['location_id'] ?? currentLocationId();
 
         $purchase = $this->purchaseService->create($data, auth()->id());
+
+        ActivityLog::record('created', $purchase);
 
         return redirect()->route('purchases.show', $purchase)->with('success', 'Purchase recorded.');
     }

@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             LookupDataSeeder::class,
             DemoPharmaciesSeeder::class,
+            RealisticDemoDataSeeder::class,
+            FullTestDataSeeder::class,
             SuperAdminSeeder::class,
         ]);
     }

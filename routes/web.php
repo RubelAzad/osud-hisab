@@ -1,13 +1,18 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BarcodeLabelController;
 use App\Http\Controllers\CashAccountController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ChequeController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CustomerGroupController;
 use App\Http\Controllers\DamagedMedicineController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\DraftController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GenericController;
@@ -21,16 +26,23 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseReturnController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\PriceGroupController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleReturnController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\StockAdjustmentController;
 use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SuperAdmin\PharmacyController as SuperAdminPharmacyController;
+use App\Http\Controllers\TaxRateController;
+use App\Http\Controllers\UpdatePriceController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WarrantyController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
@@ -86,7 +98,10 @@ Route::middleware(['auth', 'identify.pharmacy'])->group(function () {
         Route::get('medicines/barcode-labels/print', [BarcodeLabelController::class, 'print'])->name('medicines.barcode-labels.print');
         Route::get('medicines/export', [MedicineController::class, 'export'])->name('medicines.export');
     });
-    Route::middleware('permission:medicines.create')->post('medicines/import', [MedicineController::class, 'import'])->name('medicines.import');
+    Route::middleware('permission:medicines.create')->group(function () {
+        Route::post('medicines/import', [MedicineController::class, 'import'])->name('medicines.import');
+        Route::post('medicines/import-opening-stock', [MedicineController::class, 'importOpeningStock'])->name('medicines.import-opening-stock');
+    });
 
     $crudResource('medicines', MedicineController::class, 'medicines');
     $crudResource('suppliers', SupplierController::class, 'suppliers');
@@ -98,10 +113,32 @@ Route::middleware(['auth', 'identify.pharmacy'])->group(function () {
     $crudResource('expense-categories', ExpenseCategoryController::class, 'expense_categories', ['index', 'create', 'store', 'edit', 'update', 'destroy']);
     $crudResource('expenses', ExpenseController::class, 'expenses', ['index', 'create', 'store', 'edit', 'update', 'destroy']);
     $crudResource('damaged-medicines', DamagedMedicineController::class, 'damaged_medicines', ['index', 'create', 'store']);
+    $crudResource('stock-adjustments', StockAdjustmentController::class, 'stock_adjustments', ['index', 'create', 'store']);
     $crudResource('sale-returns', SaleReturnController::class, 'sale_returns', ['index', 'show']);
     $crudResource('purchase-returns', PurchaseReturnController::class, 'purchase_returns', ['index', 'show']);
     $crudResource('locations', LocationController::class, 'locations', ['index', 'create', 'store', 'edit', 'update']);
     $crudResource('stock-transfers', StockTransferController::class, 'stock_transfers', ['index', 'create', 'store', 'show']);
+    $crudResource('quotations', QuotationController::class, 'quotations', ['index', 'create', 'store', 'show']);
+    $crudResource('drafts', DraftController::class, 'drafts', ['index', 'create', 'store', 'show']);
+
+    $crudResource('discounts', DiscountController::class, 'discounts');
+    $crudResource('price-groups', PriceGroupController::class, 'price_groups');
+    Route::middleware('permission:price_groups.edit')->get('price-groups/{priceGroup}/prices', [PriceGroupController::class, 'editPrices'])->name('price-groups.prices');
+    Route::middleware('permission:price_groups.edit')->put('price-groups/{priceGroup}/prices', [PriceGroupController::class, 'updatePrices'])->name('price-groups.prices.update');
+    $crudResource('warranties', WarrantyController::class, 'warranties');
+    $crudResource('customer-groups', CustomerGroupController::class, 'customer_groups');
+    $crudResource('tax-rates', TaxRateController::class, 'tax_rates');
+
+    Route::middleware('permission:settings.edit')->group(function () {
+        Route::get('update-price', [UpdatePriceController::class, 'edit'])->name('update-price.edit');
+        Route::put('update-price', [UpdatePriceController::class, 'update'])->name('update-price.update');
+    });
+
+    Route::middleware('permission:quotations.create')->post('quotations/{quotation}/convert', [QuotationController::class, 'convert'])->name('quotations.convert');
+    Route::middleware('permission:drafts.create')->post('drafts/{draft}/convert', [DraftController::class, 'convert'])->name('drafts.convert');
+
+    Route::middleware('permission:sales.view')->get('shipments', [ShipmentController::class, 'index'])->name('shipments.index');
+    Route::middleware('permission:sales.edit')->patch('sales/{sale}/shipping-status', [SaleController::class, 'updateShippingStatus'])->name('sales.shipping-status');
 
     Route::post('locations/{location}/switch', [LocationSwitcherController::class, 'switch'])->name('locations.switch');
 
@@ -133,6 +170,11 @@ Route::middleware(['auth', 'identify.pharmacy'])->group(function () {
         Route::get('cash-accounts/create', [CashAccountController::class, 'create'])->name('cash-accounts.create');
         Route::post('cash-accounts', [CashAccountController::class, 'store'])->name('cash-accounts.store');
     });
+
+    Route::middleware('permission:cheques.view')->get('cheques', [ChequeController::class, 'index'])->name('cheques.index');
+    Route::middleware('permission:cheques.edit')->patch('cheques/{cheque}/status', [ChequeController::class, 'updateStatus'])->name('cheques.update-status');
+
+    Route::middleware('permission:activity_logs.view')->get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
 
     Route::middleware('permission:notifications.view')->group(function () {
         Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');

@@ -17,6 +17,13 @@ class GenerateStockNotifications extends Command
     {
         Pharmacy::where('status', true)->each(function (Pharmacy $pharmacy) use ($dashboardService) {
             runForPharmacy($pharmacy, function () use ($dashboardService, $pharmacy) {
+                $outOfStock = $dashboardService->outOfStockMedicines(50)->map(fn ($medicine) => [
+                    'title' => "Out of stock: {$medicine->medicine_name}",
+                    'message' => "{$medicine->medicine_name} is now out of stock.",
+                ]);
+
+                $this->refresh($pharmacy, 'out_of_stock', $outOfStock->all());
+
                 $lowStock = $dashboardService->lowStockMedicines(50)->map(fn ($medicine) => [
                     'title' => "Low stock: {$medicine->medicine_name}",
                     'message' => "Only {$medicine->total_stock} left (minimum {$medicine->minimum_stock}).",

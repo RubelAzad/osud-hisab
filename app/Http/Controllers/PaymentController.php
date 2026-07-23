@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PaymentRequest;
+use App\Models\ActivityLog;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Supplier;
@@ -28,7 +29,8 @@ class PaymentController extends Controller
 
     public function storeForCustomer(PaymentRequest $request, Customer $customer): RedirectResponse
     {
-        $this->paymentService->payCustomer($customer, $request->validated());
+        $payment = $this->paymentService->payCustomer($customer, $request->validated());
+        ActivityLog::record('created', $payment);
 
         return redirect()->route('customers.show', $customer)->with('success', 'Payment recorded.');
     }
@@ -40,7 +42,8 @@ class PaymentController extends Controller
 
     public function storeForSupplier(PaymentRequest $request, Supplier $supplier): RedirectResponse
     {
-        $this->paymentService->paySupplier($supplier, $request->validated());
+        $payment = $this->paymentService->paySupplier($supplier, $request->validated());
+        ActivityLog::record('created', $payment);
 
         return redirect()->route('suppliers.show', $supplier)->with('success', 'Payment recorded.');
     }

@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class SaleService
 {
-    public function __construct(private readonly StockMovementService $stockMovementService) {}
+    public function __construct(
+        private readonly StockMovementService $stockMovementService,
+        private readonly StockNotificationService $stockNotificationService,
+    ) {}
 
     /**
      * @param  array{
@@ -35,6 +38,7 @@ class SaleService
                 'sale_date' => $data['sale_date'],
                 'payment_method' => $data['payment_method'] ?? 'cash',
                 'note' => $data['note'] ?? null,
+                'channel' => $data['channel'] ?? 'manual',
                 'created_by' => $createdBy,
             ]);
 
@@ -115,6 +119,14 @@ class SaleService
 
             if (! empty($data['customer_id'])) {
                 Customer::whereKey($data['customer_id'])->increment('balance', $due);
+            }
+
+            $soldMedicineIds = collect($data['items'])->pluck('medicine_id')->unique();
+            foreach ($soldMedicineIds as $medicineId) {
+                $med = Medicine::withoutEvents(fn () => Medicine::find($medicineId));
+                if ($med) {
+                    $this->stockNotificationService->checkAndNotify($med);
+                }
             }
 
             return $sale->load('items');

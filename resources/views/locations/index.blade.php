@@ -3,39 +3,64 @@
 @section('title', 'Locations')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Locations</h4>
-    @can('locations.create')
-        <a href="{{ route('locations.create') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Location</a>
-    @endcan
+<div class="idx-header">
+    <h4 class="mb-0">
+        <i class="bi bi-geo-alt text-primary me-2"></i>Locations
+        <span class="idx-count">{{ $locations->count() }}</span>
+    </h4>
+    <div class="idx-actions">
+        @can('locations.create')
+            <a href="{{ route('locations.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Location</a>
+        @endcan
+    </div>
 </div>
 
 <div class="card">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr><th>Name</th><th>Phone</th><th>Batches</th><th>Default</th><th>Status</th><th class="text-end">Actions</th></tr>
+        <table class="table idx-table align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th class="text-end">Batches</th>
+                    <th>Default</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
             </thead>
             <tbody>
                 @forelse ($locations as $location)
                     <tr>
-                        <td>{{ $location->name }}</td>
-                        <td>{{ $location->phone }}</td>
-                        <td>{{ $location->medicine_batches_count }}</td>
-                        <td>{{ $location->is_default ? 'Yes' : '' }}</td>
+                        <td class="fw-semibold">{{ $location->name }}</td>
+                        <td>{{ $location->phone ?: '-' }}</td>
+                        <td class="text-end">{{ $location->medicine_batches_count }}</td>
                         <td>
-                            <span class="badge {{ $location->status ? 'bg-success' : 'bg-secondary' }}">
+                            @if($location->is_default)
+                                <span class="badge badge-info">Default</span>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="badge {{ $location->status ? 'badge-active' : 'badge-inactive' }}">
                                 {{ $location->status ? 'Active' : 'Inactive' }}
                             </span>
                         </td>
                         <td class="text-end">
-                            @can('locations.edit')
-                                <a href="{{ route('locations.edit', $location) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
-                            @endcan
+                            <div class="idx-actions justify-content-end">
+                                @can('locations.edit')
+                                    <a href="{{ route('locations.edit', $location) }}" class="btn btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                                @endcan
+                            </div>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="text-center text-muted py-4">No locations yet.</td></tr>
+                    <tr>
+                        <td colspan="6">
+                            <div class="idx-empty">
+                                <i class="bi bi-geo-alt"></i>
+                                <p>No locations found</p>
+                            </div>
+                        </td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>

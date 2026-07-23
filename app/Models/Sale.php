@@ -14,6 +14,7 @@ class Sale extends Model
     protected $fillable = [
         'pharmacy_id', 'location_id', 'invoice_no', 'customer_id', 'sale_date', 'subtotal', 'discount',
         'vat', 'total', 'paid', 'due', 'payment_method', 'created_by', 'note',
+        'shipping_status', 'shipping_address', 'shipped_at', 'channel',
     ];
 
     protected $casts = [
@@ -24,6 +25,7 @@ class Sale extends Model
         'total' => 'decimal:2',
         'paid' => 'decimal:2',
         'due' => 'decimal:2',
+        'shipped_at' => 'datetime',
     ];
 
     protected static function booted(): void

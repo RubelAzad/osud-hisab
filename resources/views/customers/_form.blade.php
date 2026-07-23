@@ -13,6 +13,15 @@
         <input type="email" name="email" class="form-control" value="{{ old('email', $customer->email ?? '') }}">
     </div>
     <div class="col-md-6 mb-3">
+        <label class="form-label">Customer Group</label>
+        <select name="customer_group_id" class="form-select">
+            <option value="">None</option>
+            @foreach ($customerGroups as $group)
+                <option value="{{ $group->id }}" {{ old('customer_group_id', $customer->customer_group_id ?? '') == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div class="col-md-6 mb-3">
         <label class="form-label">Opening Balance</label>
         @if (isset($customer))
             <input type="text" class="form-control" value="{{ number_format($customer->opening_balance, 2) }}" disabled>
